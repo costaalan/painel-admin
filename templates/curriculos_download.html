@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curriculos Ajustados — Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:#f6f5f4;color:#31302e;min-height:100vh}
+nav{background:#fff;border-bottom:1px solid rgba(0,0,0,.08);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:18px;font-weight:700;color:rgba(0,0,0,.95);text-decoration:none}.nav-logo span{color:#0075de}
+nav a{color:#31302e;text-decoration:none;font-size:14px}nav a:hover{color:#0075de}
+.container{max-width:900px;margin:0 auto;padding:40px 32px}
+h1{font-size:24px;font-weight:700;margin-bottom:8px}
+.subtitle{color:#615d59;font-size:14px;margin-bottom:24px}
+.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:16px 20px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;transition:all .2s}
+.card:hover{border-color:#0075de;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.card .info{flex:1}
+.card .info h3{font-size:15px;font-weight:600;margin-bottom:2px}
+.card .info .meta{font-size:12px;color:#615d59}
+.card .version{font-size:11px;padding:3px 10px;border-radius:6px;font-weight:600}
+.version.v1{background:rgba(59,130,246,.1);color:#3b82f6}
+.version.v2{background:rgba(34,197,94,.1);color:#16a34a}
+.btn{padding:8px 16px;border-radius:6px;border:none;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;transition:all .2s}
+.btn-primary{background:#0075de;color:#fff}.btn-primary:hover{background:#005bab}
+.btn-outline{background:transparent;border:1.5px solid rgba(0,0,0,.08);color:#31302e}
+.btn-outline:hover{border-color:#0075de}
+.section-title{font-size:16px;font-weight:600;margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid rgba(0,0,0,.06)}
+.legend{display:flex;gap:20px;font-size:12px;color:#615d59;margin-bottom:16px}
+.legend span{display:flex;align-items:center;gap:6px}
+footer{text-align:center;padding:32px;color:#615d59;font-size:13px;border-top:1px solid rgba(0,0,0,.08);margin-top:40px}
+</style>
+</head>
+<body>
+<nav>
+<a href="/" class="nav-logo">Alan<span>Costa</span></a>
+<div><a href="/painel">← Painel</a></div>
+</nav>
+<div class="container">
+  <h1>📄 Curriculos Ajustados</h1>
+  <p class="subtitle">Versoes sem data de saida do mercado e com experiencia em IA ajustada</p>
+  
+  <div class="legend">
+    <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(59,130,246,.3)"></span> V1 — sem data de saida</span>
+    <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(34,197,94,.3)"></span> V2 — V1 + IA +4 anos</span>
+    <span><a href="/curriculos-ajustados.tar.gz" class="btn btn-primary" style="font-size:11px;padding:4px 12px">📦 Baixar Todos (TAR.GZ)</a></span>
+  </div>
+  
+  {% set cargos = {
+    'AI_Agent_Developer': 'AI Agent Developer',
+    'Analista_Dados_Senior': 'Analista de Dados Senior',
+    'Engenheiro_Dados': 'Engenheiro de Dados',
+    'Engenheiro_IA_ML': 'Engenheiro de IA & ML'
+  } %}
+  
+  {% for cargo_key, cargo_name in cargos.items() %}
+  <h2 class="section-title">{{ cargo_name }}</h2>
+  
+  {% set v1_name = 'Alan_Costa_' + cargo_key + '_v1.pdf' %}
+  {% set v2_name = 'Alan_Costa_' + cargo_key + '_v2.pdf' %}
+  
+  {% if v1_name in pdfs %}
+  <div class="card">
+    <div class="info">
+      <h3>{{ cargo_name }}</h3>
+      <div class="meta">Sem data de saida · conteudo limpo (sem textos inflados)</div>
+    </div>
+    <span class="version v1">V1</span>
+    <a href="/curriculos-ajustados/{{ v1_name }}" class="btn btn-outline" style="margin-left:10px" download>⬇️ Download</a>
+  </div>
+  {% endif %}
+  
+  {% if v2_name in pdfs %}
+  <div class="card">
+    <div class="info">
+      <h3>{{ cargo_name }}</h3>
+      <div class="meta">V1 + experiencia em IA ajustada de +3 para +4 anos (desde 2021)</div>
+    </div>
+    <span class="version v2">V2</span>
+    <a href="/curriculos-ajustados/{{ v2_name }}" class="btn btn-outline" style="margin-left:10px" download>⬇️ Download</a>
+  </div>
+  {% endif %}
+  {% endfor %}
+  
+</div>
+<footer>&copy; 2026 Alan Costa &middot; alancosta.dev</footer>
+</body>
+</html>
+

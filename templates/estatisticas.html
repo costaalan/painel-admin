@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estatisticas — Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:#f6f5f4;color:#31302e}
+nav{background:#fff;border-bottom:1px solid rgba(0,0,0,.08);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:18px;font-weight:700;color:rgba(0,0,0,.95);text-decoration:none}.nav-logo span{color:#0075de}
+nav a{color:#31302e;text-decoration:none;font-size:14px}nav a:hover{color:#0075de}
+.container{max-width:800px;margin:0 auto;padding:32px}
+h1{font-size:24px;font-weight:700;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:32px}
+.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:28px 20px;text-align:center;transition:all .3s}
+.card:hover{box-shadow:0 4px 20px rgba(0,0,0,.06);transform:translateY(-2px)}
+.card .number{font-size:42px;font-weight:700;color:#0075de;font-family:'JetBrains Mono',monospace;transition:all .3s}
+.card .label{font-size:13px;color:#615d59;margin-top:6px}
+.card .sublabel{font-size:11px;color:#a39e98;margin-top:2px}
+footer{text-align:center;padding:32px;color:#615d59;font-size:13px;border-top:1px solid rgba(0,0,0,.08);margin-top:40px}
+@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<nav>
+<a href="/" class="nav-logo">Alan<span>Costa</span></a>
+<div><a href="/painel">← Painel</a></div>
+</nav>
+<div class="container">
+  <h1>📊 Visitantes do Site</h1>
+  
+  <div class="grid" id="stats-grid">
+    <div class="card"><div class="number" id="s-unicos">0</div><div class="label">Visitantes Unicos</div><div class="sublabel">total historico</div></div>
+    <div class="card"><div class="number" id="s-semana">0</div><div class="label">Visitantes Unicos</div><div class="sublabel">nos ultimos 7 dias</div></div>
+    <div class="card"><div class="number" id="s-hoje">0</div><div class="label">Visitantes Unicos</div><div class="sublabel">hoje</div></div>
+  </div>
+</div>
+
+<script>
+function animarNumero(el, target) {
+  const duration = 1200;
+  const start = performance.now();
+  const startVal = 0;
+  
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    // Easing: suave no inicio e fim
+    const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+    const current = Math.floor(eased * target);
+    el.textContent = current.toLocaleString();
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      el.textContent = target.toLocaleString();
+    }
+  }
+  requestAnimationFrame(update);
+}
+
+async function carregar() {
+  try {
+    const resp = await fetch('/painel/api/visitas');
+    const data = await resp.json();
+    
+    animarNumero(document.getElementById('s-unicos'), data.unicos);
+    animarNumero(document.getElementById('s-semana'), data.semana);
+    animarNumero(document.getElementById('s-hoje'), data.hoje);
+    
+  } catch(e) {
+    document.querySelectorAll('.number').forEach(el => el.textContent = '—');
+  }
+}
+
+carregar();
+setInterval(carregar, 30000);
+</script>
+
+<footer>&copy; 2026 Alan Costa &middot; alancosta.dev</footer>
+</body>
+</html>
