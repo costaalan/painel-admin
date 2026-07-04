@@ -19,7 +19,7 @@ class HRProxyMiddleware:
         self.routes = {
             "/hr-onboarding": (8703, "/hr-onboarding"),
             "/sentinel": (8701, "/sentinel"),
-            "/llm-failover": (8702, "/llm-failover"),
+            "/llm-failover": (8704, "/llm-failover"),
         }
     
     def _proxy_request(self, environ, start_response, port, prefix):
@@ -616,7 +616,7 @@ def hr_onboarding_proxy(subpath):
 @app.route('/llm-failover/<path:subpath>', methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
 def llm_failover_proxy(subpath):
     import urllib.request, urllib.error
-    target = f"http://localhost:8702/{subpath}" if subpath else "http://localhost:8702/"
+    target = f"http://localhost:8704/{subpath}" if subpath else "http://localhost:8704/"
     qs = request.query_string.decode()
     if qs: target += '?' + qs
     method = request.method

@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="layout">
+    <nav class="sidebar">
+        <h2>⚡ Painel Admin</h2>
+        <a href="#" class="active" onclick="showTab('curriculos')">📄 Currículos</a>
+        <a href="#" onclick="showTab('vagas')">💼 Vagas</a>
+        <a href="#", onclick="showTab('artigos')">📝 Artigos Blog</a>
+        <a href="/painel/estatisticas">📊 Estatisticas</a>
+        <a href="#", onclick="showTab('posts')">📝 Posts LinkedIn</a>
+        <a href="#" onclick="showTab('analise')">🔍 Análise de Perfil</a>
+        <div class="logout">
+            <a href="/painel/logout">🚪 Sair</a>
+        </div>
+    </nav>
+    
+    <main class="main">
+        <!-- TAB: Currículos -->
+        <div id="tab-curriculos">
+            <h1>📄 Currículos</h1>
+            <p class="subtitle">Análise e sugestões de melhoria</p>
+            <button class="btn btn-primary" onclick="analisarCurriculos()">🔄 Reanalisar Todos</button>
+            <div id="curriculos-list" class="grid" style="margin-top:20px">
+                <div class="loading">Carregando...</div>
+            </div>
+        </div>
+        
+        <!-- TAB: Vagas -->
+        <div id="tab-vagas" style="display:none">
+            <h1>💼 Vagas Home Office</h1>
+            <p class="subtitle">Dicas quentes com match baseado no seu perfil</p>
+            <button class="btn btn-primary" onclick="buscarVagas()">🔍 Buscar Novas Vagas</button>
+            <div id="vagas-list" style="margin-top:20px">
+                <div class="loading">Nenhuma vaga encontrada ainda. O agente buscará diariamente.</div>
+            </div>
+        </div>
+        
+        <!-- TAB: Artigos Blog -->
+        <div id="tab-artigos" style="display:none">
+            <h1>📝 Artigos do Blog</h1>
+            <p class="subtitle">Gerencie os artigos do alancosta.dev/blog</p>
+            <div class="card">
+                <p>Crie, edite e publique artigos para o blog.</p>
+                <p style="margin-top:8px">Suporta: ✍️ escrita direta · 🔗 importar URL · 📄 upload HTML · 📑 upload PDF</p>
+                <a href="/painel/artigos" class="btn btn-primary" style="display:inline-block;margin-top:12px">📝 Gerenciar Artigos →</a>
+            </div>
+        </div>
+        
+        <!-- TAB: Posts -->
+        <div id="tab-posts" style="display:none">
+            <h1>📝 Posts LinkedIn</h1>
+            <p class="subtitle">Segunda (dores) · Quarta (soluções IA) · Sexta (cases leves)</p>
+            <div id="posts-list" style="margin-top:20px">
+                <div class="loading">Carregando...</div>
+            </div>
+        </div>
+        
+        <!-- TAB: Análise de Perfil -->
+        <div id="tab-analise" style="display:none">
+            <h1>🔍 Análise de Perfil</h1>
+            <p class="subtitle">LinkedIn + Currículos — diagnóstico completo</p>
+            <div class="card">
+                <h3>📊 Resumo do Perfil</h3>
+                <p style="color:var(--muted); margin-top:8px;">
+                    <strong>Nome:</strong> Alan Costa<br>
+                    <strong>LinkedIn:</strong> linkedin.com/in/alan-costa-84421887<br>
+                    <strong>GitHub:</strong> github.com/costaalan<br>
+                    <strong>Email:</strong> alandatascience1@gmail.com<br>
+                    <strong>Localização:</strong> São João de Meriti, RJ · 100% Remoto<br>
+                    <strong>Experiência:</strong> 12+ anos em dados · 3+ anos IA Generativa<br>
+                    <strong>Atual:</strong> Mercado Livre — AI Agent Developer (2022-presente)
+                </p>
+            </div>
+            <div class="card" style="margin-top:16px">
+                <h3>🎯 Competências-Chave</h3>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
+                    <span class="badge badge-aprovado">Python</span>
+                    <span class="badge badge-aprovado">SQL Avançado</span>
+                    <span class="badge badge-aprovado">BigQuery</span>
+                    <span class="badge badge-aprovado">GCP</span>
+                    <span class="badge badge-aprovado">n8n</span>
+                    <span class="badge badge-aprovado">Langflow/LangGraph</span>
+                    <span class="badge badge-aprovado">RAG</span>
+                    <span class="badge badge-aprovado">LLMs</span>
+                    <span class="badge badge-aprovado">MCPs</span>
+                    <span class="badge badge-aprovado">Claude Agent SDK</span>
+                    <span class="badge badge-aprovado">Prompt Engineering</span>
+                    <span class="badge badge-aprovado">Power BI</span>
+                    <span class="badge badge-aprovado">Airflow</span>
+                    <span class="badge badge-aprovado">PySpark</span>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+function showTab(name) {
+    document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+    document.getElementById('tab-' + name).style.display = 'block';
+    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+    event.target.classList.add('active');
+    if (name === 'curriculos') carregarCurriculos();
+    if (name === 'posts') carregarPosts();
+    if (name === 'vagas') carregarVagas();
+}
+
+function carregarCurriculos() {
+    fetch('/painel/api/curriculos')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.length) {
+                document.getElementById('curriculos-list').innerHTML = 
+                    '<div class="card"><p>Nenhum currículo analisado. Clique em "Reanalisar Todos".</p></div>';
+                return;
+            }
+            let html = '';
+            data.forEach(c => {
+                let scoreClass = c.nota >= 7 ? 'score-alta' : c.nota >= 5 ? 'score-media' : 'score-baixa';
+                let sugs = JSON.parse(c.sugestoes || '[]');
+                html += `<div class="card">
+                    <h3>📄 ${c.nome}</h3>
+                    <div class="meta">${c.categoria} · Atualizado: ${c.atualizado_em || 'N/A'}</div>
+                    <span class="score ${scoreClass}">Nota: ${c.nota}/10</span>
+                    ${sugs.length ? '<ul class="sugestoes">' + sugs.map(s => '<li>💡 ' + s + '</li>').join('') + '</ul>' : ''}
+                </div>`;
+            });
+            document.getElementById('curriculos-list').innerHTML = html;
+        });
+}
+
+function analisarCurriculos() {
+    document.getElementById('curriculos-list').innerHTML = '<div class="loading">⏳ Analisando currículos...</div>';
+    fetch('/painel/api/curriculos/analisar', {method:'POST'})
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('curriculos-list').innerHTML = 
+                    '<div class="card"><p style="color:var(--red)">Erro: ' + data.error + '</p></div>';
+            } else {
+                carregarCurriculos();
+            }
+        });
+}
+
+function carregarVagas() {
+    fetch('/painel/api/vagas')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.length) {
+                document.getElementById('vagas-list').innerHTML = 
+                    '<div class="card"><p>Nenhuma vaga ainda. O agente buscará diariamente.</p></div>';
+                return;
+            }
+            let html = '<table><tr><th>Vaga</th><th>Empresa</th><th>Match</th><th>Status</th></tr>';
+            data.forEach(v => {
+                html += `<tr>
+                    <td>${v.titulo}</td><td>${v.empresa}</td>
+                    <td><span class="score ${v.match_score >= 7 ? 'score-alta' : 'score-media'}">${v.match_score}/10</span></td>
+                    <td><span class="badge badge-${v.status === 'nova' ? 'nova' : 'aprovado'}">${v.status}</span></td>
+                </tr>`;
+            });
+            html += '</table>';
+            document.getElementById('vagas-list').innerHTML = html;
+        });
+}
+
+function buscarVagas() {
+    document.getElementById('vagas-list').innerHTML = '<div class="loading">🔍 Buscando vagas...</div>';
+    fetch('/painel/api/vagas/buscar', {method:'POST'})
+        .then(r => r.json())
+        .then(() => carregarVagas());
+}
+
+function carregarPosts() {
+    fetch('/painel/api/posts')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.length) {
+                document.getElementById('posts-list').innerHTML = 
+                    '<div class="card"><p>Nenhum post criado ainda. O agente gerará posts para seg/qua/sex.</p></div>';
+                return;
+            }
+            let html = '';
+            data.forEach(p => {
+                let statusBadge = 'badge-' + p.status;
+                let imagem = p.imagem_url ? 
+                    `<img src="${p.imagem_url}" style="max-width:100%;border-radius:8px;margin:12px 0">` : '';
+                let botoes = '';
+                if (p.status === 'rascunho') {
+                    botoes = `<div style="margin-top:16px;display:flex;gap:8px">
+                        <button class="btn btn-success" onclick="aprovarPost(${p.id})">✅ Aprovar e Publicar</button>
+                        <button class="btn btn-danger" onclick="rejeitarPost(${p.id})">❌ Rejeitar</button>
+                    </div>`;
+                } else if (p.status === 'aprovado') {
+                    let texto = (p.conteudo || '').replace(/'/g, "\\'");
+                    botoes = `<div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+                        <span style="color:var(--accent2);font-size:13px">✅ Aprovado — </span>
+                        <button class="btn btn-primary" onclick="postarLinkedIn('${texto}')">🚀 Postar no LinkedIn</button>
+                    </div>`;
+                }
+                html += `<div class="card" style="grid-column:1/-1">
+                    <h3>📝 ${p.titulo}</h3>
+                    <div class="meta">${p.dia_semana || 'N/A'} · <span class="badge ${statusBadge}">${p.status.toUpperCase()}</span> · ${p.criado_em || ''}</div>
+                    ${imagem}
+                    <div style="background:var(--bg);padding:16px;border-radius:8px;margin:12px 0;white-space:pre-wrap;font-size:14px;line-height:1.7">${p.conteudo || ''}</div>
+                    ${botoes}
+                </div>`;
+            });
+            document.getElementById('posts-list').innerHTML = html;
+        });
+}
+
+function aprovarPost(id) {
+    fetch('/painel/api/posts/' + id + '/aprovar', {method:'POST'})
+        .then(() => carregarPosts());
+}
+
+function rejeitarPost(id) {
+    fetch('/api/posts/' + id + '/rejeitar', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({motivo:''})})
+        .then(() => carregarPosts());
+}
+
+function postarLinkedIn(texto) {
+    navigator.clipboard.writeText(texto).then(() => {
+        alert('✅ Texto copiado! O LinkedIn vai abrir — é só colar (Ctrl+V) e publicar.');
+        window.open('https://www.linkedin.com/feed/?shareActive=true', '_blank');
+    });
+}
+
+// Carrega currículos ao iniciar
+carregarCurriculos();
+</script>
+{% endblock %}

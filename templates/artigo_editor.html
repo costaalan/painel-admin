@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% if editando %}Editar{% else %}Novo{% endif %} Artigo — Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:#f6f5f4;color:#31302e;min-height:100vh}
+nav{background:#fff;border-bottom:1px solid rgba(0,0,0,.08);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:18px;font-weight:700;color:rgba(0,0,0,.95);text-decoration:none}.nav-logo span{color:#0075de}
+nav a{color:#31302e;text-decoration:none;font-size:14px}
+.container{max-width:800px;margin:0 auto;padding:32px}
+h1{font-size:22px;font-weight:700;margin-bottom:20px}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+input[type=text],textarea{width:100%;padding:10px 14px;border:1.5px solid rgba(0,0,0,.08);border-radius:8px;font-size:14px;outline:none;transition:border-color .2s;margin-bottom:14px}
+input:focus,textarea:focus{border-color:#0075de}
+textarea{min-height:400px;resize:vertical;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6}
+.btn-row{display:flex;gap:10px;margin-top:4px}
+.btn{padding:10px 24px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
+.btn-primary{background:#0075de;color:#fff}.btn-primary:hover{background:#005bab}
+.btn-outline{background:transparent;border:1.5px solid rgba(0,0,0,.08);color:#31302e}.btn-outline:hover{border-color:#0075de}
+.erro{background:#fef2f2;border:1px solid #fecaca;color:#ef4444;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px}
+footer{text-align:center;padding:32px;color:#615d59;font-size:13px;border-top:1px solid rgba(0,0,0,.08);margin-top:40px}
+</style>
+</head>
+<body>
+<nav>
+<a href="/" class="nav-logo">Alan<span>Costa</span></a>
+<div><a href="/painel/artigos">← Artigos</a></div>
+</nav>
+<div class="container">
+  <h1>{% if editando %}✏️ Editar{% else %}✏️ Novo{% endif %} Artigo</h1>
+  
+  {% if erro %}
+  <div class="erro">{{ erro }}</div>
+  {% endif %}
+  
+  <form method="POST">
+    <label>Titulo</label>
+    <input type="text" name="titulo" value="{{ artigo.titulo if editando else '' }}" placeholder="Titulo do artigo..." required>
+    
+    <label>Conteudo (markdown)</label>
+    <textarea name="conteudo" placeholder="Escreva seu artigo em markdown..." required>{% if editando %}{{ artigo.conteudo }}{% endif %}</textarea>
+    
+    <label>URL da imagem de capa (opcional)</label>
+    <input type="text" name="imagem_url" value="{{ artigo.imagem_url if editando else '' }}" placeholder="https://images.unsplash.com/...">
+    
+    <div class="btn-row">
+      <button type="submit" class="btn btn-primary">{% if editando %}💾 Salvar{% else %}🚀 Publicar{% endif %}</button>
+      <a href="/painel/artigos" class="btn btn-outline">Cancelar</a>
+    </div>
+  </form>
+</div>
+<footer>&copy; 2026 Alan Costa &middot; alancosta.dev</footer>
+</body>
+</html>
